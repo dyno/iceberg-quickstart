@@ -1,0 +1,24 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mc
+spec:
+  template:
+    spec:
+      containers:
+        - command:
+            - /bin/bash
+            - -x
+            - -c
+            - ' until (/usr/bin/mc config host add minio http://minio:9000 admin password) do echo ''...waiting...'' && sleep 1; done; /usr/bin/mc rm -r --force minio/warehouse; /usr/bin/mc mb --ignore-existing minio/warehouse; /usr/bin/mc policy set public minio/warehouse; exit 0; '
+          env:
+            - name: AWS_ACCESS_KEY_ID
+              value: admin
+            - name: AWS_REGION
+              value: us-east-1
+            - name: AWS_SECRET_ACCESS_KEY
+              value: password
+          image: minio/mc:latest
+          name: mc
+          resources: {}
+      restartPolicy: Never
